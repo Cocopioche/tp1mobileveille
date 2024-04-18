@@ -44,7 +44,8 @@ const Tab = createBottomTabNavigator();
 const UserContext = createContext();
 
 const checkCredentials = (username, password) => {
-    return username === 'User' && password === 'password';
+    const credentials = {"User":"password","Bob":"test","Test":"test"}
+    return credentials[username] === password;
 };
 
 function CameraScreen() {
