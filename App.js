@@ -3,14 +3,20 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { Camera, CameraType } from 'expo-camera';
+
+const [permission, requestPermission] = Camera.useCameraPermissions();
 
 const Tab = createBottomTabNavigator();
 
 function CameraScreen() {
+
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Camera Screen</Text>
+        <View style={styles.container}>
+            <Text>We need your permission to show the camera</Text>
+            <Button onPress={requestPermission} title="grant permission" />
         </View>
+
     );
 }
 
