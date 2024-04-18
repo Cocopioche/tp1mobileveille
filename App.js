@@ -76,7 +76,7 @@ function AudioScreen() {
     );
 }
 
-function ProfileScreen({ route }) {
+function ProfileScreen() {
     const { personName } = route.params || {};
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -95,7 +95,7 @@ function HomeScreen({ navigation }) {
 
     const handleLogin = () => {
         if (checkCredentials(username, password)) {
-            navigation.navigate('Profile', { personName: username });
+            navigation.navigate('Profile');
         } else {
             Alert.alert('Erreur', 'Nom d\'utilisateur ou mot de passe incorrect');
         }
