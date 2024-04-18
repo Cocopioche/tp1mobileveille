@@ -1,11 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Pressable, Button } from 'react-native';
+import { View, Text, TextInput, Pressable, Button, Alert, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { Camera } from 'expo-camera';
 
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    input: {
+        width: '80%',
+        height: 40,
+        marginVertical: 10,
+        paddingHorizontal: 10,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+    },
+    button: {
+        backgroundColor: '#007bff',
+        padding: 10,
+        borderRadius: 5,
+        width: '80%',
+        marginVertical: 10,
+    },
+    buttonText: {
+        color: '#fff',
+        textAlign: 'center',
+        fontSize: 16,
+    },
+    teammates: {
+        marginTop: 10,
+        fontSize: 14,
+        color: '#777',
+    },
+});
+
 const Tab = createBottomTabNavigator();
+
+const checkCredentials = (username, password) => {
+    return username === 'User' && password === 'password';
+};
 
 function CameraScreen() {
     const [permission, setPermission] = useState(null);
@@ -42,8 +80,11 @@ function ProfileScreen({ route }) {
     const { personName } = route.params || {};
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Profile Screen</Text>
-            {personName && <Text>Logged in as: {personName}</Text>}
+            <Text style={styles.heading}>Profil</Text>
+            {personName && <Text style={styles.username}>Connecté en tant que: {personName}</Text>}
+            <View style={styles.profileContainer}>
+                {}
+            </View>
         </View>
     );
 }
@@ -53,28 +94,34 @@ function HomeScreen({ navigation }) {
     const [password, setPassword] = useState('');
 
     const handleLogin = () => {
-        // Authenticate user and navigate to ProfileScreen with personName
-        navigation.navigate('Profile', { personName: username });
+        if (checkCredentials(username, password)) {
+            navigation.navigate('Profile', { personName: username });
+        } else {
+            Alert.alert('Erreur', 'Nom d\'utilisateur ou mot de passe incorrect');
+        }
     };
 
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Accueil</Text>
+        <View style={styles.container}>
             <TextInput
-                placeholder="Username"
+                style={styles.input}
+                placeholder="Nom d'utilisateur"
                 value={username}
                 onChangeText={setUsername}
             />
             <TextInput
-                placeholder="Password"
+                style={styles.input}
+                placeholder="Mot de passe"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
             />
-            <Pressable onPress={handleLogin}>
-                <Text>Connexion</Text>
+            <Pressable style={styles.button} onPress={handleLogin}>
+                <Text style={styles.buttonText}>Connexion</Text>
             </Pressable>
-            <Text>Co-équipiers: Noah Gendron, Jean-Christophe Rochon</Text>
+            <Text style={styles.teammates}>Co-équipiers:</Text>
+            <Text style={styles.teammates}>Noah Gendron</Text>
+            <Text style={styles.teammates}>Jean-Christophe Rochon</Text>
         </View>
     );
 }
