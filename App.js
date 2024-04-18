@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { View, Text, TextInput, Pressable, Button, Alert, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -41,11 +41,14 @@ const styles = StyleSheet.create({
 
 const Tab = createBottomTabNavigator();
 
+const UserContext = createContext();
+
 const checkCredentials = (username, password) => {
     return username === 'User' && password === 'password';
 };
 
 function CameraScreen() {
+    const { username } = useContext(UserContext);
     const [permission, setPermission] = useState(null);
 
     useEffect(() => {
@@ -62,6 +65,7 @@ function CameraScreen() {
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text>{username}</Text>
             <Text>We need your permission to show the camera</Text>
             <Button onPress={requestPermission} title="Grant Permission" />
         </View>
@@ -69,32 +73,35 @@ function CameraScreen() {
 }
 
 function AudioScreen() {
+    const { username } = useContext(UserContext);
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text>{username}</Text>
             <Text>Audio Screen</Text>
         </View>
     );
 }
 
 function ProfileScreen() {
-    const { personName } = route.params || {};
+    const { username } = useContext(UserContext);
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Text style={styles.heading}>Profil</Text>
-            {personName && <Text style={styles.username}>Connecté en tant que: {personName}</Text>}
+            {username && <Text style={styles.username}>Connecté en tant que: {username}</Text>}
             <View style={styles.profileContainer}>
-                {}
             </View>
         </View>
     );
 }
 
 function HomeScreen({ navigation }) {
+    const { setUsername: setUserContextUsername } = useContext(UserContext);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
     const handleLogin = () => {
         if (checkCredentials(username, password)) {
+            setUserContextUsername(username); // Update the username in context
             navigation.navigate('Profile');
         } else {
             Alert.alert('Erreur', 'Nom d\'utilisateur ou mot de passe incorrect');
@@ -126,48 +133,53 @@ function HomeScreen({ navigation }) {
     );
 }
 
+
 const App = () => {
+    const [username, setUsername] = useState('');
+
     return (
-        <NavigationContainer>
-            <Tab.Navigator>
-                <Tab.Screen
-                    name="Accueil"
-                    component={HomeScreen}
-                    options={{
-                        tabBarIcon: () => (
-                            <Ionicons name="home" size={24} color="black" />
-                        ),
-                    }}
-                />
-                <Tab.Screen
-                    name="Profile"
-                    component={ProfileScreen}
-                    options={{
-                        tabBarIcon: () => (
-                            <Ionicons name="people" size={24} color="black" />
-                        ),
-                    }}
-                />
-                <Tab.Screen
-                    name="Camera"
-                    component={CameraScreen}
-                    options={{
-                        tabBarIcon: () => (
-                            <Ionicons name="camera" size={24} color="black" />
-                        ),
-                    }}
-                />
-                <Tab.Screen
-                    name="Audio"
-                    component={AudioScreen}
-                    options={{
-                        tabBarIcon: () => (
-                            <Ionicons name="headset" size={24} color="black" />
-                        ),
-                    }}
-                />
-            </Tab.Navigator>
-        </NavigationContainer>
+        <UserContext.Provider value={{ username, setUsername }}>
+            <NavigationContainer>
+                <Tab.Navigator>
+                    <Tab.Screen
+                        name="Accueil"
+                        component={HomeScreen}
+                        options={{
+                            tabBarIcon: () => (
+                                <Ionicons name="home" size={24} color="black" />
+                            ),
+                        }}
+                    />
+                    <Tab.Screen
+                        name="Profile"
+                        component={ProfileScreen}
+                        options={{
+                            tabBarIcon: () => (
+                                <Ionicons name="people" size={24} color="black" />
+                            ),
+                        }}
+                    />
+                    <Tab.Screen
+                        name="Camera"
+                        component={CameraScreen}
+                        options={{
+                            tabBarIcon: () => (
+                                <Ionicons name="camera" size={24} color="black" />
+                            ),
+                        }}
+                    />
+                    <Tab.Screen
+                        name="Audio"
+                        component={AudioScreen}
+                        options={{
+                            tabBarIcon: () => (
+                                <Ionicons name="headset" size={24} color="black" />
+                            ),
+                        }}
+                    />
+                </Tab.Navigator>
+            </NavigationContainer>
+        </UserContext.Provider>
     );
 };
 
