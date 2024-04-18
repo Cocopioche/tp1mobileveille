@@ -83,17 +83,27 @@ function AudioScreen() {
     );
 }
 
-function ProfileScreen() {
-    const { username } = useContext(UserContext);
+const ProfileScreen = ({ route }) => {
+    const { personName } = route.params;
+
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={styles.heading}>Profil</Text>
-            {username && <Text style={styles.username}>Connecté en tant que: {username}</Text>}
-            <View style={styles.profileContainer}>
-            </View>
+            <Text>Welcome, {personName}!</Text>
+            {capturedImageUri && (
+                <Image
+                    source={{ uri: capturedImageUri }}
+                    style={{ width: 200, height: 200, marginTop: 20 }}
+                />
+            )}
+            {audioFilePath && (
+                <Pressable onPress={playAudio} style={{ marginTop: 20 }}>
+                    <Text>Play Audio</Text>
+                </Pressable>
+            )}
         </View>
     );
-}
+};
+
 
 function HomeScreen({ navigation }) {
     const { setUsername: setUserContextUsername } = useContext(UserContext);
@@ -154,6 +164,7 @@ const App = () => {
                     <Tab.Screen
                         name="Profile"
                         component={ProfileScreen}
+                        initialParams={ {personName: username } }
                         options={{
                             tabBarIcon: () => (
                                 <Ionicons name="people" size={24} color="black" />
