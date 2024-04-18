@@ -2,6 +2,7 @@ import { View, Text, TextInput, Pressable } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React, { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 
@@ -42,7 +43,7 @@ function HomeScreen({ navigation }) {
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Home Screen</Text>
+            <Text>Accueil</Text>
             <TextInput
                 placeholder="Username"
                 value={username}
@@ -55,9 +56,9 @@ function HomeScreen({ navigation }) {
                 secureTextEntry
             />
             <Pressable onPress={handleLogin}>
-                <Text>Login</Text>
+                <Text>Connexion</Text>
             </Pressable>
-            <Text>Co-équipiers: John, Jane, Alex</Text>
+            <Text>Co-équipiers: Noah Gendron, Jean-Christophe Rochon</Text>
         </View>
     );
 }
@@ -66,10 +67,18 @@ const App = () => {
     return (
         <NavigationContainer>
             <Tab.Navigator>
-                <Tab.Screen name="Home" component={HomeScreen} />
-                <Tab.Screen name="Profile" component={ProfileScreen} />
-                <Tab.Screen name="Camera" component={CameraScreen} />
-                <Tab.Screen name="Audio" component={AudioScreen} />
+                <Tab.Screen name="Accueil" component={HomeScreen}
+                            options={{tabBarIcon:()=><Ionicons name="home" size={24} color="black" />}}/>
+
+                <Tab.Screen name="Profile" component={ProfileScreen}
+                            options={{tabBarIcon:()=><Ionicons name="people" size={24} color="black" />}}/>
+
+                <Tab.Screen name="Camera" component={CameraScreen}
+                            options={{tabBarIcon:()=><Ionicons name="camera" size={24} color="black" />}}/>
+
+                <Tab.Screen name="Audio" component={AudioScreen}
+                            options={{tabBarIcon:()=><Ionicons name="headset" size={24} color="black" />}}/>
+
             </Tab.Navigator>
         </NavigationContainer>
     );
