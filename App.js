@@ -352,16 +352,12 @@ function HomeScreen({ navigation }) {
     const [permissionResponse, requestPermission] = Audio.usePermissions();
     const [permissionCamResponse, requestCamPermission] = Camera.useCameraPermissions();
 
-   
-
     const handleLogin = () => {
         if (checkCredentials(username, password)) {
             setUserContextUsername(username);
+
             requestPermission();
             requestCamPermission();
-
-
-
         } else {
             Alert.alert('Erreur', 'Nom d\'utilisateur ou mot de passe incorrect');
         }
@@ -398,6 +394,7 @@ const App = () => {
     const [audioFilePath, setAudioFilePath] = useState('');
     const [capturedImageUri, setCapturedImageUri] = useState('https://img.freepik.com/photos-gratuite/hacker-anonyme-masque-image-generee-par-ia_268835-6460.jpg');
 
+
     return (
         <UserContext.Provider value={{ username, setUsername, audioFilePath, setAudioFilePath, capturedImageUri, setCapturedImageUri }}>
             <NavigationContainer>
@@ -414,8 +411,10 @@ const App = () => {
                                 name="Accueil"
                                 component={HomeScreen}
                                 options={{
-                                    tabBarIcon: () => (
-                                        <Ionicons name="home" size={24} color="black" />
+                                    tabBarIcon: ({ focused }) => (
+                                        <Ionicons name="home" size={24}
+                                                  color={focused ? 'blue' : 'black'}
+                                        />
                                     ),
                                     title: username ? username : 'Accueil',
                                     tabBarLabel : 'Accueil',
@@ -426,8 +425,10 @@ const App = () => {
                                 component={ProfileScreen}
                                 initialParams={{ personName: username, capturedImageUri: "./default.jpg", audioFilePath: "" }}
                                 options={{
-                                    tabBarIcon: () => (
-                                        <Ionicons name="people" size={24} color="black" />
+                                    tabBarIcon: ({ focused }) => (
+                                        <Ionicons name="people" size={24}
+                                                  color={focused ? 'blue' : 'black'}
+                                        />
                                     ),
                                     title: username ? username : 'Profile',
                                     tabBarLabel : 'Profile',
@@ -436,20 +437,27 @@ const App = () => {
                             <Tab.Screen
                                 name="Camera"
                                 component={CameraScreen}
-                                options={{
-                                    tabBarIcon: () => (
-                                        <Ionicons name="camera" size={24} color="black" />
+                                options={({ route }) => ({
+                                    tabBarIcon: ({ focused }) => (
+                                        <Ionicons
+                                            name="camera"
+                                            size={24}
+                                            color={focused ? 'blue' : 'black'}
+                                        />
                                     ),
                                     title: username ? username : 'Camera',
                                     tabBarLabel : 'Camera',
-                                }}
+                                })}
                             />
+
                             <Tab.Screen
                                 name="Audio"
                                 component={AudioScreen}
                                 options={{
-                                    tabBarIcon: () => (
-                                        <Ionicons name="headset" size={24} color="black" />
+                                    tabBarIcon: ({ focused }) => (
+                                        <Ionicons name="headset" size={24}
+                                                  color={focused ? 'blue' : 'black'}
+                                        />
                                     ),
                                     title: username ? username : 'Audio',
                                     tabBarLabel : 'Audio',
