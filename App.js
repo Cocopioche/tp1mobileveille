@@ -253,7 +253,6 @@ const ProfileScreen = ({route}) => {
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Text>Bonjour, {username}!</Text>
-            <Text>! {capturedImageUri} !</Text>
 
             {audioFilePath && (
                 <TouchableOpacity onPress={playAudio} style={styles.audioButton}>
