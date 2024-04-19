@@ -1,5 +1,5 @@
 import React, { useState, useEffect,  createContext, useContext, useRef } from 'react';
-import { View, Text, TextInput, Pressable, TouchableOpacity, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, TouchableOpacity, Image, Button, Alert, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -93,7 +93,7 @@ const CameraScreen = () => {
     const [showCamera, setShowCamera] = useState(false); // Initialize showCamera to false
     const [type, setType] = useState(Camera.Constants.Type.back); // Import CameraType from expo-camera
     const cameraRef = useRef(null);
-    const { setCapturedUri } = useContext(UserContext);
+    const { setCapturedImageUri } = useContext(UserContext);
 
     useEffect(() => {
         (async () => {
@@ -113,9 +113,9 @@ const CameraScreen = () => {
     async function takePicture() {
         if (cameraRef.current) {
             const photo = await cameraRef.current.takePictureAsync();
-            const uri = `${FileSystem.documentDirectory}photo.jpg`; // Generate URI for saving photo
-            await FileSystem.moveAsync({ from: photo.uri, to: uri }); // Move photo to document directory
-            setCapturedUri(uri); // Save captured image URI
+            const uri = `${FileSystem.documentDirectory}photo.jpg`;
+            await FileSystem.moveAsync({ from: photo.uri, to: uri });
+            setCapturedImageUri(uri);
         }
     }
 
@@ -236,8 +236,7 @@ const AudioScreen = () => {
 
 
 const ProfileScreen = ({route}) => {
-    const { username, audioFilePath } = useContext(UserContext);
-    const { capturedImageUri } = route.params;
+    const { username, audioFilePath, capturedImageUri } = useContext(UserContext);
 
     const playAudio = async () => {
         const soundObject = new Audio.Sound();
@@ -253,13 +252,26 @@ const ProfileScreen = ({route}) => {
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Text>Bonjour, {username}!</Text>
-                <Image source={{ uri: "https://img.freepik.com/photos-gratuite/hacker-anonyme-masque-image-generee-par-ia_268835-6460.jpg" }} style={styles.image} />
+            <Text>! {capturedImageUri} !</Text>
 
             {audioFilePath && (
                 <TouchableOpacity onPress={playAudio} style={styles.audioButton}>
                     <Text style={styles.audioButtonText}>Play Audio</Text>
                 </TouchableOpacity>
 
+            )}
+            {capturedImageUri ? (
+                <Image
+                    style={styles.image}
+                    source={{ uri: capturedImageUri }}
+                />
+            ) : (
+                <Image
+                    style={styles.image}
+                    source={{
+                        uri: "./default.jpg",
+                    }}
+                />
             )}
         </View>
     );
@@ -309,9 +321,10 @@ function HomeScreen({ navigation }) {
 const App = () => {
     const [username, setUsername] = useState('');
     const [audioFilePath, setAudioFilePath] = useState('');
+    const [capturedImageUri, setcapturedImageUri] = useState('./default.jpg');
 
     return (
-        <UserContext.Provider value={{ username, setUsername, audioFilePath, setAudioFilePath }}>
+        <UserContext.Provider value={{ username, setUsername, audioFilePath, setAudioFilePath, capturedImageUri, setcapturedImageUri }}>
             <NavigationContainer>
                 <Tab.Navigator>
                     {!username ? (
