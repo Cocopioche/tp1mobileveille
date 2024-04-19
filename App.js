@@ -1,10 +1,11 @@
-import React, { useState, useEffect,  createContext, useContext } from 'react';
+import React, { useState, useEffect,  createContext, useContext, useRef } from 'react';
 import { View, Text, TextInput, Pressable, TouchableOpacity, Button, Alert, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { Camera, CameraType } from 'expo-camera';
 import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system'; // Import FileSystem from expo-file-system
 
 
 const styles = StyleSheet.create({
@@ -70,6 +71,12 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
     },
+    image: {
+        width: 200,
+        height: 200,
+        borderRadius: 100,
+        marginVertical: 20,
+    },
 });
 
 const Tab = createBottomTabNavigator();
@@ -85,6 +92,8 @@ const CameraScreen = () => {
     const [permission, setPermission] = useState(null);
     const [showCamera, setShowCamera] = useState(false); // Initialize showCamera to false
     const [type, setType] = useState(Camera.Constants.Type.back); // Import CameraType from expo-camera
+    const cameraRef = useRef(null);
+    const { setCapturedUri } = useContext(UserContext);
 
     useEffect(() => {
         (async () => {
@@ -99,6 +108,15 @@ const CameraScreen = () => {
                 ? Camera.Constants.Type.front
                 : Camera.Constants.Type.back
         );
+    }
+
+    async function takePicture() {
+        if (cameraRef.current) {
+            const photo = await cameraRef.current.takePictureAsync();
+            const uri = `${FileSystem.documentDirectory}photo.jpg`; // Generate URI for saving photo
+            await FileSystem.moveAsync({ from: photo.uri, to: uri }); // Move photo to document directory
+            setCapturedUri(uri); // Save captured image URI
+        }
     }
 
     if (permission === null) {
@@ -116,6 +134,9 @@ const CameraScreen = () => {
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity style={styles.camButton} onPress={toggleCameraType}>
                             <Text style={styles.text}>Flip Camera</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.camButton} onPress={takePicture}>
+                            <Text style={styles.text}>Take Picture</Text>
                         </TouchableOpacity>
                     </View>
                 </Camera>
@@ -217,6 +238,7 @@ const AudioScreen = () => {
 const ProfileScreen = ({route}) => {
     const { username, audioFilePath } = useContext(UserContext);
     const { capturedImageUri } = route.params;
+
     const playAudio = async () => {
         const soundObject = new Audio.Sound();
         try {
@@ -231,10 +253,13 @@ const ProfileScreen = ({route}) => {
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Text>Bonjour, {username}!</Text>
+                <Image source={{ uri: "https://img.freepik.com/photos-gratuite/hacker-anonyme-masque-image-generee-par-ia_268835-6460.jpg" }} style={styles.image} />
+
             {audioFilePath && (
                 <TouchableOpacity onPress={playAudio} style={styles.audioButton}>
                     <Text style={styles.audioButtonText}>Play Audio</Text>
                 </TouchableOpacity>
+
             )}
         </View>
     );
@@ -311,7 +336,7 @@ const App = () => {
                             <Tab.Screen
                                 name="Profile"
                                 component={ProfileScreen}
-                                initialParams={{ personName: username, capturedImageUri: "", audioFilePath: "" }}
+                                initialParams={{ personName: username, capturedImageUri: "./default.jpg", audioFilePath: "" }}
                                 options={{
                                     tabBarIcon: () => (
                                         <Ionicons name="people" size={24} color="black" />
