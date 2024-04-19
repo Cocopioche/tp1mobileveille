@@ -69,43 +69,50 @@ const checkCredentials = (username, password) => {
     return credentials[username] === password;
 };
 
-function CameraScreen() {
-    const [permission, requestPermission] = Camera.useCameraPermissions();
-    const [showCamera, setShowCamera] = useState(true); // State to control whether to show the camera
-    const [type, setType] = useState(CameraType.back);
-
-    function toggleCameraType() {
-        setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
-    }
+const CameraScreen = () => {
+    const [permission, setPermission] = useState(null);
+    const [showCamera, setShowCamera] = useState(false); // Initialize showCamera to false
+    const [type, setType] = useState(Camera.Constants.Type.back); // Import CameraType from expo-camera
 
     useEffect(() => {
-        // Set showCamera to true if permission is granted
-        if (permission && permission.granted) {
-            setShowCamera(true);
-        }
+        (async () => {
+            const { status } = await Camera.requestCameraPermissionsAsync();
+            setPermission(status === 'granted');
+        })();
     }, []);
 
+    function toggleCameraType() {
+        setType(
+            type === Camera.Constants.Type.back
+                ? Camera.Constants.Type.front
+                : Camera.Constants.Type.back
+        );
+    }
+
+    if (permission === null) {
+        return <View><Text>Requesting camera permission...</Text></View>;
+    }
+
+    if (permission === false) {
+        return <View><Text>No access to camera</Text></View>;
+    }
+
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            {(!permission || !permission.granted) && (
-                <Text>We 76tufy your permission to show the camera</Text>
-            )}
-            {permission && permission.granted && !showCamera && (
-                <Button onPress={requestPermission} title="Grant Permission" />
-            )}
-            {showCamera && (
-                <Camera style={styles.camera}>
+        <View style={{ flex: 1 }}>
+            {showCamera ? ( // Only render the camera if showCamera is true
+                <Camera style={{ flex: 1 }} type={type}>
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity style={styles.camButton} onPress={toggleCameraType}>
                             <Text style={styles.text}>Flip Camera</Text>
                         </TouchableOpacity>
                     </View>
                 </Camera>
+            ) : (
+                <Button onPress={() => setShowCamera(true)} title="Open Camera" />
             )}
         </View>
     );
-}
-
+};
 function AudioScreen() {
     const { username } = useContext(UserContext);
     return (
