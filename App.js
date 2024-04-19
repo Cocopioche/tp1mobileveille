@@ -123,14 +123,14 @@ function AudioScreen() {
     );
 }
 
-const ProfileScreen = ({ route }) => {
-    const { personName } = route.params;
+const ProfileScreen = ({route}) => {
+    const { username } = useContext(UserContext);
     const { capturedImageUri } = route.params;
     const { audioFilePath } = route.params;
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Welcome, {personName}!</Text>
+            <Text>Bonjour, {username}!</Text>
             {capturedImageUri &&+ (
                 <Image
                     source={{ uri: capturedImageUri }}
@@ -154,7 +154,7 @@ function HomeScreen({ navigation }) {
 
     const handleLogin = () => {
         if (checkCredentials(username, password)) {
-            setUserContextUsername(username); // Update the username in context
+            setUserContextUsername(username);
             navigation.navigate('Profile');
         } else {
             Alert.alert('Erreur', 'Nom d\'utilisateur ou mot de passe incorrect');
@@ -201,6 +201,7 @@ const App = () => {
                             tabBarIcon: () => (
                                 <Ionicons name="home" size={24} color="black" />
                             ),
+                            title: username ? username : 'Accueil',
                         }}
                     />
                     <Tab.Screen
@@ -211,6 +212,7 @@ const App = () => {
                             tabBarIcon: () => (
                                 <Ionicons name="people" size={24} color="black" />
                             ),
+                            title: username ? username : 'Profile',
                         }}
                     />
                     <Tab.Screen
@@ -220,6 +222,7 @@ const App = () => {
                             tabBarIcon: () => (
                                 <Ionicons name="camera" size={24} color="black" />
                             ),
+                            title: username ? username : 'Camera',
                         }}
                     />
                     <Tab.Screen
@@ -229,6 +232,7 @@ const App = () => {
                             tabBarIcon: () => (
                                 <Ionicons name="headset" size={24} color="black" />
                             ),
+                            title: username ? username : 'Audio',
                         }}
                     />
                 </Tab.Navigator>
