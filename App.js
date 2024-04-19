@@ -350,11 +350,18 @@ function HomeScreen({ navigation }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [permissionResponse, requestPermission] = Audio.usePermissions();
+    const [permissionCamResponse, requestCamPermission] = Camera.useCameraPermissions();
+
+   
 
     const handleLogin = () => {
         if (checkCredentials(username, password)) {
             setUserContextUsername(username);
-            requestPermission()
+            requestPermission();
+            requestCamPermission();
+
+
+
         } else {
             Alert.alert('Erreur', 'Nom d\'utilisateur ou mot de passe incorrect');
         }
