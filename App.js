@@ -158,7 +158,7 @@ const CameraScreen = () => {
             setZoom(zoom + 0.1);
         }
     }
-
+//asdasdasd
     function zoomOut() {
         if (zoom > 0) {
             setZoom(zoom - 0.1);
@@ -210,6 +210,15 @@ const AudioScreen = () => {
     const { setAudioFilePath } = useContext(UserContext);
 
     useEffect(() => {
+        (async () => {
+            if (permissionResponse && permissionResponse.status !== 'granted') {
+                console.log('Requesting microphone permission..');
+                await requestPermission();
+            }
+        })();
+    }, []);
+
+    useEffect(() => {
         if (audioUri) {
             // Load the audio for playback
             const soundObject = new Audio.Sound();
@@ -232,9 +241,10 @@ const AudioScreen = () => {
     async function startRecording() {
         try {
             if (permissionResponse.status !== 'granted') {
-                console.log('Requesting permission..');
-                await requestPermission();
+                console.log('Microphone permission not granted.');
+                return;
             }
+
             await Audio.setAudioModeAsync({
                 allowsRecordingIOS: true,
                 playsInSilentModeIOS: true,
@@ -339,10 +349,12 @@ function HomeScreen({ navigation }) {
     const { setUsername: setUserContextUsername } = useContext(UserContext);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [permissionResponse, requestPermission] = Audio.usePermissions();
 
     const handleLogin = () => {
         if (checkCredentials(username, password)) {
             setUserContextUsername(username);
+            requestPermission()
         } else {
             Alert.alert('Erreur', 'Nom d\'utilisateur ou mot de passe incorrect');
         }
