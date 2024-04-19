@@ -218,7 +218,6 @@ function HomeScreen({ navigation }) {
     const handleLogin = () => {
         if (checkCredentials(username, password)) {
             setUserContextUsername(username);
-            navigation.navigate('Profile');
         } else {
             Alert.alert('Erreur', 'Nom d\'utilisateur ou mot de passe incorrect');
         }
@@ -257,55 +256,67 @@ const App = () => {
         <UserContext.Provider value={{ username, setUsername }}>
             <NavigationContainer>
                 <Tab.Navigator>
-                    <Tab.Screen
-                        name="Accueil"
-                        component={HomeScreen}
-                        options={{
-                            tabBarIcon: () => (
-                                <Ionicons name="home" size={24} color="black" />
-                            ),
-                            title: username ? username : 'Accueil',
-                            tabBarLabel : 'Accueil',
-                        }}
-                    />
-                    <Tab.Screen
-                        name="Profile"
-                        component={ProfileScreen}
-                        initialParams={ {personName: username, capturedImageUri: "", audioFilePath: "" } }
-                        options={{
-                            tabBarIcon: () => (
-                                <Ionicons name="people" size={24} color="black" />
-                            ),
-                            title: username ? username : 'Profile',
-                            tabBarLabel : 'Profile',
-                        }}
-                    />
-                    <Tab.Screen
-                        name="Camera"
-                        component={CameraScreen}
-                        options={{
-                            tabBarIcon: () => (
-                                <Ionicons name="camera" size={24} color="black" />
-                            ),
-                            title: username ? username : 'Camera',
-                            tabBarLabel : 'Camera',
-                        }}
-                    />
-                    <Tab.Screen
-                        name="Audio"
-                        component={AudioScreen}
-                        options={{
-                            tabBarIcon: () => (
-                                <Ionicons name="headset" size={24} color="black" />
-                            ),
-                            title: username ? username : 'Audio',
-                            tabBarLabel : 'Audio',
-                        }}
-                    />
+                    {!username ? (
+                        <Tab.Screen
+                            name="Home"
+                            component={HomeScreen}
+                            options={{ tabBarVisible: false }}
+                        />
+                    ) : (
+                        <>
+                            <Tab.Screen
+                                name="Accueil"
+                                component={HomeScreen}
+                                options={{
+                                    tabBarIcon: () => (
+                                        <Ionicons name="home" size={24} color="black" />
+                                    ),
+                                    title: username ? username : 'Accueil',
+                                    tabBarLabel : 'Accueil',
+                                }}
+                            />
+                            <Tab.Screen
+                                name="Profile"
+                                component={ProfileScreen}
+                                initialParams={{ personName: username, capturedImageUri: "", audioFilePath: "" }}
+                                options={{
+                                    tabBarIcon: () => (
+                                        <Ionicons name="people" size={24} color="black" />
+                                    ),
+                                    title: username ? username : 'Profile',
+                                    tabBarLabel : 'Profile',
+                                }}
+                            />
+                            <Tab.Screen
+                                name="Camera"
+                                component={CameraScreen}
+                                options={{
+                                    tabBarIcon: () => (
+                                        <Ionicons name="camera" size={24} color="black" />
+                                    ),
+                                    title: username ? username : 'Camera',
+                                    tabBarLabel : 'Camera',
+                                }}
+                            />
+                            <Tab.Screen
+                                name="Audio"
+                                component={AudioScreen}
+                                options={{
+                                    tabBarIcon: () => (
+                                        <Ionicons name="headset" size={24} color="black" />
+                                    ),
+                                    title: username ? username : 'Audio',
+                                    tabBarLabel : 'Audio',
+                                }}
+                            />
+                        </>
+                    )}
                 </Tab.Navigator>
             </NavigationContainer>
         </UserContext.Provider>
     );
 };
+
+
 
 export default App;
