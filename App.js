@@ -1,9 +1,9 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
-import { View, Text, TextInput, Pressable, Button, Alert, StyleSheet } from 'react-native';
+import React, { useState, useEffect,  createContext, useContext } from 'react';
+import { View, Text, TextInput, Pressable, TouchableOpacity, Button, Alert, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { Camera } from 'expo-camera';
+import { Camera, CameraType } from 'expo-camera';
 
 const styles = StyleSheet.create({
     container: {
@@ -37,6 +37,27 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#777',
     },
+
+
+    camera: {
+        flex: 1,
+    },
+    buttonContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        backgroundColor: 'transparent',
+        margin: 64,
+    },
+
+    text: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: 'white',
+    },
+
+
+
+
 });
 
 const Tab = createBottomTabNavigator();
@@ -49,26 +70,38 @@ const checkCredentials = (username, password) => {
 };
 
 function CameraScreen() {
-    const { username } = useContext(UserContext);
-    const [permission, setPermission] = useState(null);
+    const [permission, requestPermission] = Camera.useCameraPermissions();
+    const [showCamera, setShowCamera] = useState(true); // State to control whether to show the camera
+    const [type, setType] = useState(CameraType.back);
+
+    function toggleCameraType() {
+        setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
+    }
 
     useEffect(() => {
-        (async () => {
-            const { status } = await Camera.requestCameraPermissionsAsync();
-            setPermission(status === 'granted');
-        })();
+        // Set showCamera to true if permission is granted
+        if (permission && permission.granted) {
+            setShowCamera(true);
+        }
     }, []);
-
-    const requestPermission = async () => {
-        const { status } = await Camera.requestCameraPermissionsAsync();
-        setPermission(status === 'granted');
-    };
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>{username}</Text>
-            <Text>We need your permission to show the camera</Text>
-            <Button onPress={requestPermission} title="Grant Permission" />
+            {(!permission || !permission.granted) && (
+                <Text>We 76tufy your permission to show the camera</Text>
+            )}
+            {permission && permission.granted && !showCamera && (
+                <Button onPress={requestPermission} title="Grant Permission" />
+            )}
+            {showCamera && (
+                <Camera style={styles.camera}>
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={styles.camButton} onPress={toggleCameraType}>
+                            <Text style={styles.text}>Flip Camera</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Camera>
+            )}
         </View>
     );
 }
@@ -85,11 +118,13 @@ function AudioScreen() {
 
 const ProfileScreen = ({ route }) => {
     const { personName } = route.params;
+    const { capturedImageUri } = route.params;
+    const { audioFilePath } = route.params;
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Text>Welcome, {personName}!</Text>
-            {capturedImageUri && (
+            {capturedImageUri &&+ (
                 <Image
                     source={{ uri: capturedImageUri }}
                     style={{ width: 200, height: 200, marginTop: 20 }}
@@ -164,7 +199,7 @@ const App = () => {
                     <Tab.Screen
                         name="Profile"
                         component={ProfileScreen}
-                        initialParams={ {personName: username } }
+                        initialParams={ {personName: username, capturedImageUri: "", audioFilePath: "" } }
                         options={{
                             tabBarIcon: () => (
                                 <Ionicons name="people" size={24} color="black" />
