@@ -59,6 +59,17 @@ const styles = StyleSheet.create({
     audioInfo: {
         marginVertical: 10,
     },
+    audioButton: {
+        backgroundColor: '#007bff',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 5,
+        marginTop: 20,
+    },
+    audioButtonText: {
+        color: '#fff',
+        fontSize: 16,
+    },
 });
 
 const Tab = createBottomTabNavigator();
@@ -118,6 +129,7 @@ const AudioScreen = () => {
     const [recording, setRecording] = useState();
     const [audioUri, setAudioUri] = useState(null);
     const [permissionResponse, requestPermission] = Audio.usePermissions();
+    const { setAudioFilePath } = useContext(UserContext);
 
     useEffect(() => {
         if (audioUri) {
@@ -170,6 +182,7 @@ const AudioScreen = () => {
         });
         const uri = recording.getURI();
         setAudioUri(uri); // Store the URI of the recorded audio
+        setAudioFilePath(uri) // Update audio file path in the context
         console.log('Recording stopped and stored at', uri);
     }
 
@@ -202,27 +215,31 @@ const AudioScreen = () => {
 
 
 const ProfileScreen = ({route}) => {
-    const { username } = useContext(UserContext);
+    const { username, audioFilePath } = useContext(UserContext);
     const { capturedImageUri } = route.params;
-    const { audioFilePath } = route.params;
+    const playAudio = async () => {
+        const soundObject = new Audio.Sound();
+        try {
+            await soundObject.loadAsync({ uri: audioFilePath }); // Charger l'audio à partir de l'URI
+            await soundObject.playAsync(); // Lire l'audio
+        } catch (error) {
+            console.error('Failed to play audio', error);
+        }
+    };
+
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Text>Bonjour, {username}!</Text>
-            {capturedImageUri &&+ (
-                <Image
-                    source={{ uri: capturedImageUri }}
-                    style={{ width: 200, height: 200, marginTop: 20 }}
-                />
-            )}
             {audioFilePath && (
-                <Pressable onPress={playAudio} style={{ marginTop: 20 }}>
-                    <Text>Play Audio</Text>
-                </Pressable>
+                <TouchableOpacity onPress={playAudio} style={styles.audioButton}>
+                    <Text style={styles.audioButtonText}>Play Audio</Text>
+                </TouchableOpacity>
             )}
         </View>
     );
 };
+
 
 
 function HomeScreen({ navigation }) {
@@ -266,9 +283,10 @@ function HomeScreen({ navigation }) {
 
 const App = () => {
     const [username, setUsername] = useState('');
+    const [audioFilePath, setAudioFilePath] = useState('');
 
     return (
-        <UserContext.Provider value={{ username, setUsername }}>
+        <UserContext.Provider value={{ username, setUsername, audioFilePath, setAudioFilePath }}>
             <NavigationContainer>
                 <Tab.Navigator>
                     {!username ? (
