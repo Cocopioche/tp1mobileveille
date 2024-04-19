@@ -116,6 +116,7 @@ const CameraScreen = () => {
             const uri = `${FileSystem.documentDirectory}photo.jpg`;
             await FileSystem.moveAsync({ from: photo.uri, to: uri });
             setCapturedImageUri(uri);
+            console.log(uri);
         }
     }
 
@@ -130,7 +131,7 @@ const CameraScreen = () => {
     return (
         <View style={{ flex: 1 }}>
             {showCamera ? ( // Only render the camera if showCamera is true
-                <Camera style={{ flex: 1 }} type={type}>
+                <Camera style={{ flex: 1 }} type={type} ref={cameraRef}>
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity style={styles.camButton} onPress={toggleCameraType}>
                             <Text style={styles.text}>Flip Camera</Text>
@@ -321,10 +322,10 @@ function HomeScreen({ navigation }) {
 const App = () => {
     const [username, setUsername] = useState('');
     const [audioFilePath, setAudioFilePath] = useState('');
-    const [capturedImageUri, setcapturedImageUri] = useState('https://img.freepik.com/photos-gratuite/hacker-anonyme-masque-image-generee-par-ia_268835-6460.jpg');
+    const [capturedImageUri, setCapturedImageUri] = useState('https://img.freepik.com/photos-gratuite/hacker-anonyme-masque-image-generee-par-ia_268835-6460.jpg');
 
     return (
-        <UserContext.Provider value={{ username, setUsername, audioFilePath, setAudioFilePath, capturedImageUri, setcapturedImageUri }}>
+        <UserContext.Provider value={{ username, setUsername, audioFilePath, setAudioFilePath, capturedImageUri, setCapturedImageUri }}>
             <NavigationContainer>
                 <Tab.Navigator>
                     {!username ? (
