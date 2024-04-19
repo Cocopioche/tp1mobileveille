@@ -56,10 +56,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'black',
     },
-
-
-
-
+    audioInfo: {
+        marginVertical: 10,
+    },
 });
 
 const Tab = createBottomTabNavigator();
@@ -115,22 +114,45 @@ const CameraScreen = () => {
         </View>
     );
 };
-function AudioScreen() {
-    const [recording, setRecording] = useState(null);
-    const [sound, setSound] = useState(null);
+const AudioScreen = () => {
+    const [recording, setRecording] = useState();
     const [audioUri, setAudioUri] = useState(null);
+    const [permissionResponse, requestPermission] = Audio.usePermissions();
+
+    useEffect(() => {
+        if (audioUri) {
+            // Load the audio for playback
+            const soundObject = new Audio.Sound();
+            const loadAudio = async () => {
+                try {
+                    await soundObject.loadAsync({ uri: audioUri });
+                } catch (error) {
+                    console.error('Failed to load audio', error);
+                }
+            };
+
+            loadAudio();
+
+            return () => {
+                soundObject.unloadAsync();
+            };
+        }
+    }, [audioUri]);
 
     async function startRecording() {
         try {
-            console.log('Requesting permissions..');
-            await Audio.requestPermissionsAsync();
+            if (permissionResponse.status !== 'granted') {
+                console.log('Requesting permission..');
+                await requestPermission();
+            }
             await Audio.setAudioModeAsync({
                 allowsRecordingIOS: true,
                 playsInSilentModeIOS: true,
             });
-            console.log('Starting recording...');
+
+            console.log('Starting recording..');
             const { recording } = await Audio.Recording.createAsync(
-                Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+                Audio.RecordingOptionsPresets.HIGH_QUALITY
             );
             setRecording(recording);
             console.log('Recording started');
@@ -140,51 +162,44 @@ function AudioScreen() {
     }
 
     async function stopRecording() {
-        console.log('Stopping recording...');
+        console.log('Stopping recording..');
         setRecording(undefined);
         await recording.stopAndUnloadAsync();
+        await Audio.setAudioModeAsync({
+            allowsRecordingIOS: false,
+        });
         const uri = recording.getURI();
-        setAudioUri(uri);
+        setAudioUri(uri); // Store the URI of the recorded audio
         console.log('Recording stopped and stored at', uri);
     }
 
-    async function playSound() {
-        console.log('Loading sound...');
-        const { sound } = await Audio.Sound.createAsync(
-            { uri: audioUri },
-            { shouldPlay: true }
-        );
-        setSound(sound);
-        console.log('Playing sound...');
-        await sound.playAsync();
+    async function playAudio() {
+        const soundObject = new Audio.Sound();
+        try {
+            await soundObject.loadAsync({ uri: audioUri });
+            await soundObject.playAsync();
+        } catch (error) {
+            console.error('Failed to play audio', error);
+        }
     }
 
-    useEffect(() => {
-        return sound
-            ? () => {
-                console.log('Unloading Sound');
-                sound.unloadAsync();
-            }
-            : undefined;
-    }, [sound]);
-
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            {recording && <Text style={styles.text}>Recording in progress...</Text>}
-            <TouchableOpacity style={styles.button} onPress={startRecording} disabled={recording}>
-                <Text style={styles.buttonText}>Start Recording</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={stopRecording} disabled={!recording}>
-                <Text style={styles.buttonText}>Stop Recording</Text>
-            </TouchableOpacity>
+        <View style={styles.container}>
+            <Button
+                title={recording ? 'Stop Recording' : 'Start Recording'}
+                onPress={recording ? stopRecording : startRecording}
+            />
             {audioUri && (
-                <TouchableOpacity style={styles.button} onPress={playSound}>
-                    <Text style={styles.buttonText}>Play Audio</Text>
-                </TouchableOpacity>
+                <>
+                    <Text style={styles.audioInfo}>Recording saved at: {audioUri}</Text>
+                    <Button title="Play Recording" onPress={playAudio} />
+                </>
             )}
         </View>
     );
 }
+
+
 
 const ProfileScreen = ({route}) => {
     const { username } = useContext(UserContext);
@@ -316,7 +331,5 @@ const App = () => {
         </UserContext.Provider>
     );
 };
-
-
 
 export default App;
