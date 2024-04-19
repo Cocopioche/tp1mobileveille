@@ -202,6 +202,7 @@ const App = () => {
                                 <Ionicons name="home" size={24} color="black" />
                             ),
                             title: username ? username : 'Accueil',
+                            tabBarLabel : 'Accueil',
                         }}
                     />
                     <Tab.Screen
@@ -213,6 +214,7 @@ const App = () => {
                                 <Ionicons name="people" size={24} color="black" />
                             ),
                             title: username ? username : 'Profile',
+                            tabBarLabel : 'Profile',
                         }}
                     />
                     <Tab.Screen
@@ -223,6 +225,7 @@ const App = () => {
                                 <Ionicons name="camera" size={24} color="black" />
                             ),
                             title: username ? username : 'Camera',
+                            tabBarLabel : 'Camera',
                         }}
                     />
                     <Tab.Screen
@@ -233,6 +236,7 @@ const App = () => {
                                 <Ionicons name="headset" size={24} color="black" />
                             ),
                             title: username ? username : 'Audio',
+                            tabBarLabel : 'Audio',
                         }}
                     />
                 </Tab.Navigator>
