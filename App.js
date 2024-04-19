@@ -45,11 +45,16 @@ const styles = StyleSheet.create({
     camera: {
         flex: 1,
     },
-    buttonContainer: {
+    cameraContainer: {
         flex: 1,
-        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    buttonContainer: {
+        position: 'absolute',
+        top: 20,
+        left: 20,
         backgroundColor: 'transparent',
-        margin: 64,
     },
 
     text: {
@@ -71,6 +76,13 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
     },
+    camButton: {
+        fontSize: 8,
+        backgroundColor: '#007bff',
+        padding: 10,
+        borderRadius: 5,
+        marginBottom: 10,
+    },
     image: {
         width: 200,
         height: 200,
@@ -88,10 +100,13 @@ const checkCredentials = (username, password) => {
     return credentials[username] === password;
 };
 
+
 const CameraScreen = () => {
     const [permission, setPermission] = useState(null);
-    const [showCamera, setShowCamera] = useState(false); // Initialize showCamera to false
-    const [type, setType] = useState(Camera.Constants.Type.back); // Import CameraType from expo-camera
+    const [showCamera, setShowCamera] = useState(false);
+    const [type, setType] = useState(Camera.Constants.Type.back);
+    const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
+    const [zoom, setZoom] = useState(0);
     const cameraRef = useRef(null);
     const { setCapturedImageUri } = useContext(UserContext);
 
@@ -110,6 +125,16 @@ const CameraScreen = () => {
         );
     }
 
+    function toggleFlashMode() {
+        setFlashMode(
+            flashMode === Camera.Constants.FlashMode.off
+                ? Camera.Constants.FlashMode.on
+                : flashMode === Camera.Constants.FlashMode.on
+                    ? Camera.Constants.FlashMode.auto
+                    : Camera.Constants.FlashMode.off
+        );
+    }
+
     async function takePicture() {
         if (cameraRef.current) {
             const photo = await cameraRef.current.takePictureAsync();
@@ -117,6 +142,26 @@ const CameraScreen = () => {
             await FileSystem.moveAsync({ from: photo.uri, to: uri });
             setCapturedImageUri(uri);
             console.log(uri);
+        }
+    }
+
+    async function autoFocus() {
+        if (cameraRef.current) {
+            const autoFocusMode = cameraRef.current.AutoFocus;
+            cameraRef.current.AutoFocus = autoFocusMode === 'on' ? 'off' : 'on';
+            console.log('Auto Focus mode:', cameraRef.current.AutoFocus);
+        }
+    }
+
+    function zoomIn() {
+        if (zoom < 1) {
+            setZoom(zoom + 0.1);
+        }
+    }
+
+    function zoomOut() {
+        if (zoom > 0) {
+            setZoom(zoom - 0.1);
         }
     }
 
@@ -130,15 +175,26 @@ const CameraScreen = () => {
 
     return (
         <View style={{ flex: 1 }}>
-            {showCamera ? ( // Only render the camera if showCamera is true
-                <Camera style={{ flex: 1 }} type={type} ref={cameraRef}>
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.camButton} onPress={toggleCameraType}>
-                            <Text style={styles.text}>Flip Camera</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.camButton} onPress={takePicture}>
-                            <Text style={styles.text}>Take Picture</Text>
-                        </TouchableOpacity>
+            {showCamera ? (
+                <Camera style={{ flex: 1 }} type={type} flashMode={flashMode} zoom={zoom} ref={cameraRef}>
+                    <View style={styles.container}>
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity style={styles.camButton} onPress={toggleCameraType}>
+                                <Text style={styles.text}>Flip Camera</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.camButton} onPress={toggleFlashMode}>
+                                <Text style={styles.text}>Toggle Flash</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.camButton} onPress={takePicture}>
+                                <Text style={styles.text}>Take Picture</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.camButton} onPress={zoomIn}>
+                                <Text style={styles.text}>Zoom In</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.camButton} onPress={zoomOut}>
+                                <Text style={styles.text}>Zoom Out</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </Camera>
             ) : (
@@ -242,8 +298,8 @@ const ProfileScreen = ({route}) => {
     const playAudio = async () => {
         const soundObject = new Audio.Sound();
         try {
-            await soundObject.loadAsync({ uri: audioFilePath }); // Charger l'audio à partir de l'URI
-            await soundObject.playAsync(); // Lire l'audio
+            await soundObject.loadAsync({ uri: audioFilePath });
+            await soundObject.playAsync();
         } catch (error) {
             console.error('Failed to play audio', error);
         }
