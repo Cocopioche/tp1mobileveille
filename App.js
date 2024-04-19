@@ -269,7 +269,7 @@ const ProfileScreen = ({route}) => {
                 <Image
                     style={styles.image}
                     source={{
-                        uri: "./default.jpg",
+                        uri: "https://img.freepik.com/photos-gratuite/hacker-anonyme-masque-image-generee-par-ia_268835-6460.jpg",
                     }}
                 />
             )}
@@ -321,7 +321,7 @@ function HomeScreen({ navigation }) {
 const App = () => {
     const [username, setUsername] = useState('');
     const [audioFilePath, setAudioFilePath] = useState('');
-    const [capturedImageUri, setcapturedImageUri] = useState('./default.jpg');
+    const [capturedImageUri, setcapturedImageUri] = useState('https://img.freepik.com/photos-gratuite/hacker-anonyme-masque-image-generee-par-ia_268835-6460.jpg');
 
     return (
         <UserContext.Provider value={{ username, setUsername, audioFilePath, setAudioFilePath, capturedImageUri, setcapturedImageUri }}>
