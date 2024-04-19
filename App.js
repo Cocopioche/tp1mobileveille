@@ -4,6 +4,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { Camera, CameraType } from 'expo-camera';
+import { Audio } from 'expo-av';
+
 
 const styles = StyleSheet.create({
     container: {
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: 'white',
+        color: 'black',
     },
 
 
@@ -114,11 +116,72 @@ const CameraScreen = () => {
     );
 };
 function AudioScreen() {
-    const { username } = useContext(UserContext);
+    const [recording, setRecording] = useState(null);
+    const [sound, setSound] = useState(null);
+    const [audioUri, setAudioUri] = useState(null);
+
+    async function startRecording() {
+        try {
+            console.log('Requesting permissions..');
+            await Audio.requestPermissionsAsync();
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: true,
+                playsInSilentModeIOS: true,
+            });
+            console.log('Starting recording...');
+            const { recording } = await Audio.Recording.createAsync(
+                Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+            );
+            setRecording(recording);
+            console.log('Recording started');
+        } catch (err) {
+            console.error('Failed to start recording', err);
+        }
+    }
+
+    async function stopRecording() {
+        console.log('Stopping recording...');
+        setRecording(undefined);
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI();
+        setAudioUri(uri);
+        console.log('Recording stopped and stored at', uri);
+    }
+
+    async function playSound() {
+        console.log('Loading sound...');
+        const { sound } = await Audio.Sound.createAsync(
+            { uri: audioUri },
+            { shouldPlay: true }
+        );
+        setSound(sound);
+        console.log('Playing sound...');
+        await sound.playAsync();
+    }
+
+    useEffect(() => {
+        return sound
+            ? () => {
+                console.log('Unloading Sound');
+                sound.unloadAsync();
+            }
+            : undefined;
+    }, [sound]);
+
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>{username}</Text>
-            <Text>Audio Screen</Text>
+            {recording && <Text style={styles.text}>Recording in progress...</Text>}
+            <TouchableOpacity style={styles.button} onPress={startRecording} disabled={recording}>
+                <Text style={styles.buttonText}>Start Recording</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={stopRecording} disabled={!recording}>
+                <Text style={styles.buttonText}>Stop Recording</Text>
+            </TouchableOpacity>
+            {audioUri && (
+                <TouchableOpacity style={styles.button} onPress={playSound}>
+                    <Text style={styles.buttonText}>Play Audio</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 }
